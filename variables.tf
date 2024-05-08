@@ -34,78 +34,137 @@ variable "high_priority_alarm" {
 }
 
 variable "burst_balance_low_threshold" {
-  type    = number
-  default = 70
+  type        = number
+  default     = 70
+  description = <<-EOM
+  Only relevant when the storage_type is "gp2".
+
+  What percentage of burst balance can be left before a low priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "burst_balance_vlow_threshold" {
-  type    = number
-  default = 30
+  type        = number
+  default     = 30
+  description = <<-EOM
+  Only relevant when the storage_type is "gp2".
+
+  What percentage of burst balance can be left before a high priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "read_latency_high_threshold" {
-  type    = number
-  default = 5
+  type        = number
+  default     = 5
+  description = <<-EOM
+  How many milliseconds can disk read operations take before a low priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "read_latency_vhigh_threshold" {
-  type    = number
-  default = 10
+  type        = number
+  default     = 10
+  description = <<-EOM
+  How many milliseconds can disk read operations take before a high priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "write_latency_high_threshold" {
-  type    = number
-  default = 5
+  type        = number
+  default     = 5
+  description = <<-EOM
+  How many milliseconds can disk write operations take before a low priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "write_latency_vhigh_threshold" {
-  type    = number
-  default = 10
+  type        = number
+  default     = 10
+  description = <<-EOM
+  How many milliseconds can disk write operations take before a high priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "free_storage_space_percentage_low_threshold" {
-  type    = number
-  default = 15
+  type        = number
+  default     = 15
+  description = <<-EOM
+  What percentage of disk space can be left before a low priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "free_storage_space_percentage_vlow_threshold" {
-  type    = number
-  default = 5
+  type        = number
+  default     = 5
+  description = <<-EOM
+  What percentage of disk space can be left before a high priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "cpu_utilization_high_threshold" {
-  type    = number
-  default = 70
+  type        = number
+  default     = 70
+  description = <<-EOM
+  How much cpu can be consumed until a low priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "cpu_utilization_vhigh_threshold" {
-  type    = number
-  default = 90
+  type        = number
+  default     = 90
+  description = <<-EOM
+  How much cpu can be consumed until a high priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "replica_lag_high_threshold" {
-  type    = number
-  default = 60
+  type        = number
+  default     = 60
+  description = <<-EOM
+  Only relevant when the instance is replicating from another source.
+
+  How far behind can replication be in seconds before a low priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "replica_lag_vhigh_threshold" {
-  type    = number
-  default = 120
+  type        = number
+  default     = 120
+  description = <<-EOM
+  Only relevant when the instance is replicating from another source.
+
+  How far behind can replication be in seconds before a high priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "replication_fault" {
-  type    = bool
-  default = true
+  type        = bool
+  default     = true
+  description = <<-EOM
+  Only relevant when the instance is replicating from another source.
+
+  Should a high priority alarm be triggered when replication fails? Set to false to disable.
+  EOM
 }
 
 variable "cpu_credit_balance_low_threshold" {
-  type    = number
-  default = 100
+  type        = number
+  default     = 100
+  description = <<-EOM
+  Only relevant when the instance class uses burstable cpu.
+
+  How many CPU credits can be left before a low priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "cpu_credit_balance_vlow_threshold" {
-  type    = number
-  default = 29
+  type        = number
+  default     = 29
+  description = <<-EOM
+  Only relevant when the instance class uses burstable cpu.
+
+  How many CPU credits can be left before a high priority alert is triggered? Set to null to disable.
+  EOM
 }
 
 variable "tags" {
