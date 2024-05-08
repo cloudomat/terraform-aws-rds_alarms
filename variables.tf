@@ -12,9 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-variable "db_instance_identifier" {
-  type        = string
-  description = "The identifier of the database instance for alarming"
+variable "db_instance" {
+  type = object({
+    identifier          = string
+    instance_class      = string
+    allocated_storage   = optional(number)
+    replicate_source_db = optional(string)
+    storage_type        = string
+    iops                = optional(number)
+  })
 }
 
 variable "low_priority_alarm" {
@@ -25,22 +31,6 @@ variable "low_priority_alarm" {
 variable "high_priority_alarm" {
   type        = list(string)
   description = "The actions to trigger on a high priority alarm"
-}
-
-variable "allocated_storage" {
-  type        = number
-  description = "The size in GiB of disk space allocated to the instance"
-}
-
-variable "replicate_source_db" {
-  type        = string
-  description = "The replicate source db of the instance"
-  default     = ""
-}
-
-variable "db_instance_class" {
-  type        = string
-  description = "The class of the db instance"
 }
 
 variable "burst_balance_low_threshold" {
@@ -55,37 +45,32 @@ variable "burst_balance_vlow_threshold" {
 
 variable "read_latency_high_threshold" {
   type    = number
-  default = 0.005
+  default = 5
 }
 
 variable "read_latency_vhigh_threshold" {
   type    = number
-  default = 0.01
+  default = 10
 }
 
 variable "write_latency_high_threshold" {
   type    = number
-  default = 0.005
+  default = 5
 }
 
 variable "write_latency_vhigh_threshold" {
   type    = number
-  default = 0.01
-}
-
-variable "fss_fraction_low_threshold" {
-  type    = number
-  default = 0.15
-}
-
-variable "fss_fraction_vlow_threshold" {
-  type    = number
-  default = 0.05
-}
-
-variable "fss_amount_critical_threshold" {
-  type    = number
   default = 10
+}
+
+variable "free_storage_space_percentage_low_threshold" {
+  type    = number
+  default = 15
+}
+
+variable "free_storage_space_percentage_vlow_threshold" {
+  type    = number
+  default = 5
 }
 
 variable "cpu_utilization_high_threshold" {
@@ -108,6 +93,11 @@ variable "replica_lag_vhigh_threshold" {
   default = 120
 }
 
+variable "replication_fault" {
+  type    = bool
+  default = true
+}
+
 variable "cpu_credit_balance_low_threshold" {
   type    = number
   default = 100
@@ -119,6 +109,6 @@ variable "cpu_credit_balance_vlow_threshold" {
 }
 
 variable "tags" {
-  type    = map
+  type    = map(any)
   default = {}
 }
