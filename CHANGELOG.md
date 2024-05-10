@@ -1,3 +1,9 @@
+## 0.2.1
+
+BUG FIXES:
+
+* Fixes free storage space alarms.
+
 ## 0.2.0
 
 BREAKING CHANGES:
