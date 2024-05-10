@@ -164,7 +164,7 @@ run "alarms" {
   }
 
   assert {
-    condition     = aws_cloudwatch_metric_alarm.alarms["low_free_storage_space"].threshold == 200
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_free_storage_space"].threshold == (200 * 1024 * 1024 * 1024)
     error_message = <<-EOM
     Incorrect low priority alarm threshold.
     Got ${aws_cloudwatch_metric_alarm.alarms["low_free_storage_space"].threshold}, expected 200
@@ -172,7 +172,7 @@ run "alarms" {
   }
 
   assert {
-    condition     = aws_cloudwatch_metric_alarm.alarms["high_free_storage_space"].threshold == 100
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_free_storage_space"].threshold == (100 * 1024 * 1024 * 1024)
     error_message = <<-EOM
     Incorrect high priority alarm threshold.
     Got ${aws_cloudwatch_metric_alarm.alarms["high_free_storage_space"].threshold}, expected 100

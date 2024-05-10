@@ -93,8 +93,8 @@ locals {
 
   only_known_storage = {
     free_storage_space = {
-      low_value          = try(coalesce(local.allocated_storage, 0) * (var.free_storage_space_percentage_low_threshold / 100.0), null)
-      high_value         = try(coalesce(local.allocated_storage, 0) * (var.free_storage_space_percentage_vlow_threshold / 100.0), null)
+      low_value          = try(coalesce(local.allocated_storage, 0) * 1024 * 1024 * 1024 * (var.free_storage_space_percentage_low_threshold / 100.0), null)
+      high_value         = try(coalesce(local.allocated_storage, 0) * 1024 * 1024 * 1024 * (var.free_storage_space_percentage_vlow_threshold / 100.0), null)
       display_low_value  = var.free_storage_space_percentage_low_threshold
       display_high_value = var.free_storage_space_percentage_vlow_threshold
       metric_description = "Free Storage Space"
