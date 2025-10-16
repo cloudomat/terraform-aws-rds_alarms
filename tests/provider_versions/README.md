@@ -8,8 +8,10 @@ This directory contains test configurations to verify that the terraform-aws-rds
 provider_versions/
 ├── v4/
 │   └── main.tf          # Test configuration for AWS Provider 4.x
-└── v5/
-    └── main.tf          # Test configuration for AWS Provider 5.x
+├── v5/
+│   └── main.tf          # Test configuration for AWS Provider 5.x
+└── v6/
+    └── main.tf          # Test configuration for AWS Provider 6.x
 ```
 
 ## Running Tests Locally
@@ -24,6 +26,7 @@ This script will:
 1. Run standard Terraform tests (with mock providers)
 2. Test compatibility with AWS Provider 4.x
 3. Test compatibility with AWS Provider 5.x
+4. Test compatibility with AWS Provider 6.x
 
 ## Test Approach
 
@@ -37,8 +40,8 @@ Each provider version directory contains a complete Terraform configuration that
 
 To test a new provider version:
 
-1. Create a new directory (e.g., `v6/`)
-2. Copy `v5/main.tf` as a starting point
+1. Create a new directory (e.g., `v7/`)
+2. Copy `v6/main.tf` as a starting point
 3. Update the `required_providers` version constraint
 4. Update `test-all-versions.sh` to include the new version
 

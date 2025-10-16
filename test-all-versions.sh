@@ -96,6 +96,13 @@ echo ""
 
 test_provider_version "v5"
 
+# 4. Test AWS Provider 6.x
+echo -e "${BLUE}Step 4: Testing AWS Provider 6.x Compatibility${NC}"
+echo -e "${BLUE}===============================================${NC}"
+echo ""
+
+test_provider_version "v6"
+
 # Summary
 echo ""
 echo -e "${BLUE}========================================${NC}"
