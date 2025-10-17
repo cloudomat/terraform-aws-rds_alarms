@@ -4,7 +4,7 @@ version: 2.1
 executors:
   terraform:
     docker:
-      - image: hashicorp/terraform:1.5
+      - image: hashicorp/terraform:latest
     working_directory: ~/project
 
 # Reusable commands
