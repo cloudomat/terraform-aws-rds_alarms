@@ -1,0 +1,59 @@
+version: 2.1
+
+# Terraform executor with latest stable version
+executors:
+  terraform:
+    docker:
+      - image: hashicorp/terraform:latest
+    working_directory: ~/project
+
+# Reusable commands
+commands:
+  run_tests:
+    description: "Run all tests including provider version compatibility"
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --no-cache bash grep
+      - run:
+          name: Run all tests
+          command: |
+            chmod +x test-all-versions.sh
+            ./test-all-versions.sh
+      - run:
+          name: Clean up test artifacts
+          when: always
+          command: |
+            rm -rf tests/provider_versions/*/terraform.tfstate*
+            rm -rf tests/provider_versions/*/.terraform
+            rm -rf tests/provider_versions/*/.terraform.lock.hcl
+
+# Jobs
+jobs:
+  test:
+    executor: terraform
+    steps:
+      - run_tests
+
+# Workflows
+workflows:
+  version: 2
+
+  # Run tests on every commit
+  test-on-commit:
+    jobs:
+      - test
+
+  # Run tests nightly to catch provider drift
+  nightly-tests:
+    triggers:
+      - schedule:
+          cron: "0 2 * * *"  # 2 AM UTC daily
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - test
