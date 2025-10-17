@@ -167,6 +167,74 @@ variable "cpu_credit_balance_vlow_threshold" {
   EOM
 }
 
+variable "custom_alarms" {
+  description = <<-EOT
+    Custom CloudWatch alarms for additional RDS metrics.
+
+    Threshold naming indicates direction:
+    - high_threshold/vhigh_threshold: Alarm when metric is ABOVE threshold
+    - low_threshold/vlow_threshold: Alarm when metric is BELOW threshold
+
+    Priority levels:
+    - high_threshold/low_threshold: Low priority (warning) → uses low_priority_alarm SNS topic
+    - vhigh_threshold/vlow_threshold: High priority (critical) → uses high_priority_alarm SNS topic
+
+    You can set both high AND low thresholds on the same metric to detect both extremes.
+
+    Example - Detect database connection issues (too high OR too low):
+      custom_alarms = {
+        "connection_health" = {
+          metric_name     = "DatabaseConnections"
+          high_threshold  = 1000  # Warning when too many connections
+          vhigh_threshold = 1500  # Critical when too many connections
+          low_threshold   = 20    # Warning when too few connections
+          vlow_threshold  = 10    # Critical when too few connections
+          unit            = " connections"
+        }
+
+        "network_activity" = {
+          metric_name    = "NetworkReceiveThroughput"
+          vlow_threshold = 300000  # Only alarm on low throughput
+          unit           = " bytes/sec"
+        }
+      }
+
+    All metrics use the AWS/RDS namespace and DBInstanceIdentifier dimension automatically.
+  EOT
+
+  type = map(object({
+    # Required
+    metric_name = string
+
+    # Thresholds (at least one required, can mix high and low)
+    high_threshold  = optional(number)  # Low priority: alarm when metric > threshold
+    vhigh_threshold = optional(number)  # High priority: alarm when metric > threshold
+    low_threshold   = optional(number)  # Low priority: alarm when metric < threshold
+    vlow_threshold  = optional(number)  # High priority: alarm when metric < threshold
+
+    # Optional tuning
+    statistic          = optional(string, "Average")  # Average, Sum, Maximum, Minimum, SampleCount
+    period             = optional(number, 300)        # Evaluation period in seconds
+    evaluation_periods = optional(number, 1)          # Number of periods before alarming
+
+    # Optional display
+    description = optional(string)  # Human-readable metric name (auto-generated if not provided)
+    unit        = optional(string, "")  # Unit suffix for alarm description (e.g., "ms", "%", " connections")
+  }))
+
+  default = {}
+
+  validation {
+    condition = alltrue([
+      for k, v in var.custom_alarms : (
+        v.high_threshold != null || v.vhigh_threshold != null ||
+        v.low_threshold != null || v.vlow_threshold != null
+      )
+    ])
+    error_message = "Each custom alarm must have at least one threshold set (high_threshold, vhigh_threshold, low_threshold, or vlow_threshold)."
+  }
+}
+
 variable "tags" {
   type    = map(any)
   default = {}

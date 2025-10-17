@@ -62,6 +62,27 @@ Setting a threshold variable to `null` disables that alarm level for that metric
 
 The module takes a `db_instance` object (not individual variables) containing RDS instance properties from `data.aws_db_instance`. This design enables the module to introspect instance characteristics and conditionally create relevant alarms.
 
+## Custom Alarms
+
+The module supports user-defined custom alarms via the `custom_alarms` variable (variables.tf:170-236). This allows users to quickly add alarms for metrics not covered by the built-in alarms.
+
+### Design
+
+- **Threshold naming indicates direction**: `high_threshold`/`vhigh_threshold` alarm when metric > threshold, `low_threshold`/`vlow_threshold` alarm when metric < threshold
+- **Bidirectional support**: Can set both high and low thresholds on the same metric (e.g., DatabaseConnections can alarm when too high OR too low)
+- **Integration**: Custom alarms are transformed into the same internal structure as built-in alarms (main.tf:32-76) and flow through the same `aws_cloudwatch_metric_alarm.alarms` resource
+- **Namespacing**: Custom alarm keys are prefixed with `custom_` internally to avoid collisions (e.g., `custom_connection_health_high`, `custom_connection_health_low`)
+- **Description handling**: If `description` is not provided, the metric name is used as-is in alarm names/descriptions
+
+### Custom Alarm Transformation Logic (main.tf:32-76)
+
+The `custom_alarm_configs` local splits bidirectional alarms into separate high/low entries:
+- High direction alarms: Created when `high_threshold` or `vhigh_threshold` is set
+- Low direction alarms: Created when `low_threshold` or `vlow_threshold` is set
+- Each direction creates up to 2 alarms (low priority + high priority)
+
+These are merged into `relevant_alarms` (main.tf:172) before being split into `low_priority_alarms` and `high_priority_alarms`.
+
 ## Moved Blocks
 
 Lines 174-247 contain `moved` blocks for backward compatibility from v0.1.0 to v0.2.0, mapping old individual alarm resources to the new dynamic alarm map.

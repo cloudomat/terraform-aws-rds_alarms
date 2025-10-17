@@ -29,6 +29,52 @@ locals {
   resource_name       = var.db_instance.identifier
   replicate_source_db = var.db_instance.replicate_source_db
 
+  # Transform custom_alarms into internal alarm format
+  # If an alarm has both high and low thresholds, split into two entries
+  custom_alarm_configs = merge(
+    # High direction alarms (when any high/vhigh threshold is set)
+    {
+      for name, config in var.custom_alarms : "custom_${name}_high" => {
+        metric_name        = config.metric_name
+        metric_description = coalesce(
+          config.description,
+          config.metric_name
+        )
+        metric_postfix     = config.unit
+        statistic          = config.statistic
+        period             = config.period
+        evaluation_periods = config.evaluation_periods
+        directionality     = "high"
+
+        low_value          = config.high_threshold
+        high_value         = config.vhigh_threshold
+        display_low_value  = config.high_threshold
+        display_high_value = config.vhigh_threshold
+      } if config.high_threshold != null || config.vhigh_threshold != null
+    },
+
+    # Low direction alarms (when any low/vlow threshold is set)
+    {
+      for name, config in var.custom_alarms : "custom_${name}_low" => {
+        metric_name        = config.metric_name
+        metric_description = coalesce(
+          config.description,
+          config.metric_name
+        )
+        metric_postfix     = config.unit
+        statistic          = config.statistic
+        period             = config.period
+        evaluation_periods = config.evaluation_periods
+        directionality     = "low"
+
+        low_value          = config.low_threshold
+        high_value         = config.vlow_threshold
+        display_low_value  = config.low_threshold
+        display_high_value = config.vlow_threshold
+      } if config.low_threshold != null || config.vlow_threshold != null
+    }
+  )
+
   always_on = {
     cpu_utilization = {
       low_value          = var.cpu_utilization_high_threshold
@@ -122,7 +168,8 @@ locals {
     # when using gp2 disks.
     var.db_instance.storage_type == "gp2" && (local.allocated_storage == null || coalesce(local.allocated_storage, 0) < 1000) ? local.only_burstable_storage : {},
     var.db_instance.replicate_source_db != null && local.replicate_source_db != "" ? local.only_replicate : {},
-    startswith(var.db_instance.instance_class, "db.t") ? local.only_burstable : {}
+    startswith(var.db_instance.instance_class, "db.t") ? local.only_burstable : {},
+    local.custom_alarm_configs
   )
 
   low_priority_alarms  = { for key, value in local.relevant_alarms : "low_${key}" => merge(value, { level = "", value = value["low_value"], display_value = lookup(value, "display_low_value", value["low_value"]) }) if value["low_value"] != null }
