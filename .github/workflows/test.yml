@@ -24,6 +24,9 @@ jobs:
           terraform_version: latest
           terraform_wrapper: false
 
+      - name: Initialize Terraform
+        run: terraform init
+
       - name: Run all tests
         run: |
           chmod +x test-all-versions.sh
