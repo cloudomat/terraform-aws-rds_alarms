@@ -1,0 +1,40 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    # Run nightly at 2 AM UTC to catch provider drift
+    - cron: '0 2 * * *'
+
+jobs:
+  test:
+    name: Terraform Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+          terraform_wrapper: false
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Run all tests
+        run: |
+          chmod +x test-all-versions.sh
+          ./test-all-versions.sh
+
+      - name: Clean up test artifacts
+        if: always()
+        run: |
+          rm -rf tests/provider_versions/*/terraform.tfstate*
+          rm -rf tests/provider_versions/*/.terraform
+          rm -rf tests/provider_versions/*/.terraform.lock.hcl
