@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a Terraform module for creating CloudWatch alarms for AWS RDS instances. It supports dual-threshold alarming: low priority (early warning) and high priority (immediate attention required) for various RDS metrics.
 
+**Core Purpose:** Monitor a single AWS RDS database instance using builtin AWS/RDS CloudWatch metrics.
+
 ## Requirements
 
 - Terraform >= 1.5.0
