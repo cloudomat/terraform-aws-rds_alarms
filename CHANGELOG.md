@@ -1,3 +1,19 @@
+## 1.0.0-rc1
+
+IMPROVEMENTS:
+
+* Added examples directory with 5 real-world usage scenarios (minimal, replica-monitoring, performance-monitoring, burstable-instance, complete)
+* Added comprehensive built-in metrics documentation covering all 11 monitored metrics
+* Added alarm selection flowchart visualizing instance-aware alarm creation logic
+* Added upgrade guide documenting migration from v0.2.1 to v1.0
+
+NOTES:
+
+* This is a release candidate for v1.0.0
+* No code changes since v0.4.0 - documentation and examples only
+* Module now monitors 11 RDS CloudWatch metrics with 100% test coverage
+* Full backward compatibility maintained with v0.2.1
+
 ## 0.4.0
 
 FEATURES:
