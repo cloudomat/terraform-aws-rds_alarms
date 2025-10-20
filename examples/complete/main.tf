@@ -20,7 +20,8 @@ data "aws_db_instance" "database" {
 
 # Complete RDS CloudWatch alarms configuration with all features enabled
 module "rds_alarms" {
-  source = "cloudomat/rds_alarms/aws"
+  source  = "cloudomat/rds_alarms/aws"
+  version = "~> 0.4.0"
 
   db_instance = data.aws_db_instance.database
 

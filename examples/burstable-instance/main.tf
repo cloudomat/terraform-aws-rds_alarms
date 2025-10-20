@@ -20,7 +20,8 @@ data "aws_db_instance" "database" {
 
 # Create RDS CloudWatch alarms optimized for burstable (T3/T4g) instances
 module "rds_alarms" {
-  source = "cloudomat/rds_alarms/aws"
+  source  = "cloudomat/rds_alarms/aws"
+  version = "~> 0.4.0"
 
   db_instance = data.aws_db_instance.database
 

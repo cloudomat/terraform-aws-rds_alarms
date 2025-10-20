@@ -20,7 +20,8 @@ data "aws_db_instance" "replica" {
 
 # Create RDS CloudWatch alarms optimized for read replica monitoring
 module "rds_alarms" {
-  source = "cloudomat/rds_alarms/aws"
+  source  = "cloudomat/rds_alarms/aws"
+  version = "~> 0.4.0"
 
   db_instance = data.aws_db_instance.replica
 

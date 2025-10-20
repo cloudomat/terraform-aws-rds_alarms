@@ -34,7 +34,7 @@ terraform apply
 
 ## What You Get
 
-This minimal configuration creates **6 alarms**:
+This minimal configuration creates **8 alarms**:
 - 2 CPU alarms (warning + critical)
 - 2 Read latency alarms (warning + critical)
 - 2 Write latency alarms (warning + critical)
