@@ -103,6 +103,34 @@ locals {
       metric_name        = "WriteLatency"
       metric_postfix     = "ms"
       directionality     = "high"
+    },
+    disk_queue_depth = {
+      low_value          = var.disk_queue_depth_high_threshold
+      high_value         = var.disk_queue_depth_vhigh_threshold
+      metric_postfix     = ""
+      metric_description = "Disk Queue Depth"
+      metric_name        = "DiskQueueDepth"
+      directionality     = "high"
+    },
+    freeable_memory = {
+      low_value          = try(var.freeable_memory_low_threshold * 1024 * 1024, null)
+      high_value         = try(var.freeable_memory_vlow_threshold * 1024 * 1024, null)
+      display_low_value  = var.freeable_memory_low_threshold
+      display_high_value = var.freeable_memory_vlow_threshold
+      metric_description = "Freeable Memory"
+      metric_name        = "FreeableMemory"
+      metric_postfix     = "MB"
+      directionality     = "low"
+    },
+    swap_usage = {
+      low_value          = try(var.swap_usage_high_threshold * 1024 * 1024, null)
+      high_value         = try(var.swap_usage_vhigh_threshold * 1024 * 1024, null)
+      display_low_value  = var.swap_usage_high_threshold
+      display_high_value = var.swap_usage_vhigh_threshold
+      metric_description = "Swap Usage"
+      metric_name        = "SwapUsage"
+      metric_postfix     = "MB"
+      directionality     = "high"
     }
   }
 
