@@ -479,3 +479,173 @@ run "description_handling" {
     error_message = "Expected 'Custom Description' in alarm description, got: ${aws_cloudwatch_metric_alarm.alarms["high_custom_test2_high"].alarm_description}"
   }
 }
+
+# Test 8: Extended statistics support (p99 latency tracking)
+run "extended_statistic_support" {
+  variables {
+    custom_alarms = {
+      "p99_read_latency" = {
+        metric_name        = "ReadLatency"
+        extended_statistic = "p99"
+        vhigh_threshold    = 0.050  # 50ms in seconds
+        description        = "p99 Read Latency"
+        unit               = "s"
+        period             = 60
+      }
+      "p95_write_latency" = {
+        metric_name        = "WriteLatency"
+        extended_statistic = "p95"
+        high_threshold     = 0.030  # 30ms in seconds
+        description        = "p95 Write Latency"
+        unit               = "s"
+      }
+    }
+  }
+
+  command = plan
+
+  assert {
+    condition     = length(keys(aws_cloudwatch_metric_alarm.alarms)) == 2
+    error_message = "Expected 2 alarms for extended statistic test. Got ${length(keys(aws_cloudwatch_metric_alarm.alarms))}: ${join(", ", keys(aws_cloudwatch_metric_alarm.alarms))}"
+  }
+
+  # Verify extended_statistic is set for p99 alarm
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_custom_p99_read_latency_high"].extended_statistic == "p99"
+    error_message = "Expected extended_statistic to be 'p99', got: ${try(aws_cloudwatch_metric_alarm.alarms["high_custom_p99_read_latency_high"].extended_statistic, "NOT SET")}"
+  }
+
+  # Verify statistic is null when extended_statistic is set
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_custom_p99_read_latency_high"].statistic == null
+    error_message = "Expected statistic to be null when extended_statistic is set"
+  }
+
+  # Verify extended_statistic is set for p95 alarm
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_custom_p95_write_latency_high"].extended_statistic == "p95"
+    error_message = "Expected extended_statistic to be 'p95', got: ${try(aws_cloudwatch_metric_alarm.alarms["low_custom_p95_write_latency_high"].extended_statistic, "NOT SET")}"
+  }
+
+  # Verify statistic is null when extended_statistic is set
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_custom_p95_write_latency_high"].statistic == null
+    error_message = "Expected statistic to be null when extended_statistic is set"
+  }
+
+  # Verify threshold value is correct
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_custom_p99_read_latency_high"].threshold == 0.050
+    error_message = "Expected threshold to be 0.050, got: ${try(aws_cloudwatch_metric_alarm.alarms["high_custom_p99_read_latency_high"].threshold, "NOT SET")}"
+  }
+
+  # Verify period is correctly set
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_custom_p99_read_latency_high"].period == 60
+    error_message = "Expected period to be 60, got: ${try(aws_cloudwatch_metric_alarm.alarms["high_custom_p99_read_latency_high"].period, "NOT SET")}"
+  }
+}
+
+# Test 9: treat_missing_data support
+run "treat_missing_data_support" {
+  variables {
+    custom_alarms = {
+      "connection_with_ignore" = {
+        metric_name        = "DatabaseConnections"
+        low_threshold      = 10
+        description        = "Connections (ignore missing)"
+        treat_missing_data = "ignore"
+      }
+      "connection_with_notBreaching" = {
+        metric_name        = "DatabaseConnections"
+        high_threshold     = 1000
+        description        = "Connections (notBreaching)"
+        treat_missing_data = "notBreaching"
+      }
+      "connection_with_breaching" = {
+        metric_name        = "DatabaseConnections"
+        vhigh_threshold    = 1500
+        description        = "Connections (breaching)"
+        treat_missing_data = "breaching"
+      }
+      "connection_with_default" = {
+        metric_name    = "DatabaseConnections"
+        vlow_threshold = 5
+        description    = "Connections (default missing)"
+        # treat_missing_data not set - should default to "missing"
+      }
+    }
+  }
+
+  command = plan
+
+  assert {
+    condition     = length(keys(aws_cloudwatch_metric_alarm.alarms)) == 4
+    error_message = "Expected 4 alarms for treat_missing_data test. Got ${length(keys(aws_cloudwatch_metric_alarm.alarms))}: ${join(", ", keys(aws_cloudwatch_metric_alarm.alarms))}"
+  }
+
+  # Verify treat_missing_data = "ignore"
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_custom_connection_with_ignore_low"].treat_missing_data == "ignore"
+    error_message = "Expected treat_missing_data to be 'ignore', got: ${try(aws_cloudwatch_metric_alarm.alarms["low_custom_connection_with_ignore_low"].treat_missing_data, "NOT SET")}"
+  }
+
+  # Verify treat_missing_data = "notBreaching"
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_custom_connection_with_notBreaching_high"].treat_missing_data == "notBreaching"
+    error_message = "Expected treat_missing_data to be 'notBreaching', got: ${try(aws_cloudwatch_metric_alarm.alarms["low_custom_connection_with_notBreaching_high"].treat_missing_data, "NOT SET")}"
+  }
+
+  # Verify treat_missing_data = "breaching"
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_custom_connection_with_breaching_high"].treat_missing_data == "breaching"
+    error_message = "Expected treat_missing_data to be 'breaching', got: ${try(aws_cloudwatch_metric_alarm.alarms["high_custom_connection_with_breaching_high"].treat_missing_data, "NOT SET")}"
+  }
+
+  # Verify default treat_missing_data = "missing"
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_custom_connection_with_default_low"].treat_missing_data == "missing"
+    error_message = "Expected treat_missing_data to default to 'missing', got: ${try(aws_cloudwatch_metric_alarm.alarms["high_custom_connection_with_default_low"].treat_missing_data, "NOT SET")}"
+  }
+}
+
+# Test 10: Combined extended_statistic and treat_missing_data
+run "combined_extended_stat_and_treat_missing" {
+  variables {
+    custom_alarms = {
+      "p99_cpu_notBreaching" = {
+        metric_name        = "CPUUtilization"
+        extended_statistic = "p99"
+        vhigh_threshold    = 95
+        description        = "p99 CPU Utilization"
+        unit               = "%"
+        treat_missing_data = "notBreaching"
+      }
+    }
+  }
+
+  command = plan
+
+  assert {
+    condition     = length(keys(aws_cloudwatch_metric_alarm.alarms)) == 1
+    error_message = "Expected 1 alarm. Got ${length(keys(aws_cloudwatch_metric_alarm.alarms))}"
+  }
+
+  # Verify extended_statistic is set
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_custom_p99_cpu_notBreaching_high"].extended_statistic == "p99"
+    error_message = "Expected extended_statistic to be 'p99'"
+  }
+
+  # Verify treat_missing_data is set
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_custom_p99_cpu_notBreaching_high"].treat_missing_data == "notBreaching"
+    error_message = "Expected treat_missing_data to be 'notBreaching'"
+  }
+
+  # Verify statistic is null
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_custom_p99_cpu_notBreaching_high"].statistic == null
+    error_message = "Expected statistic to be null when extended_statistic is set"
+  }
+}

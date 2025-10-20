@@ -261,9 +261,11 @@ variable "custom_alarms" {
     vlow_threshold  = optional(number)  # High priority: alarm when metric < threshold
 
     # Optional tuning
-    statistic          = optional(string, "Average")  # Average, Sum, Maximum, Minimum, SampleCount
-    period             = optional(number, 300)        # Evaluation period in seconds
-    evaluation_periods = optional(number, 1)          # Number of periods before alarming
+    statistic           = optional(string, "Average")      # Average, Sum, Maximum, Minimum, SampleCount (conflicts with extended_statistic)
+    extended_statistic  = optional(string)                 # Percentiles: p0, p10, p50, p90, p95, p99, p100, etc. (conflicts with statistic)
+    period              = optional(number, 300)            # Evaluation period in seconds
+    evaluation_periods  = optional(number, 1)              # Number of periods before alarming
+    treat_missing_data  = optional(string, "missing")      # How to treat missing data: "missing", "ignore", "breaching", "notBreaching"
 
     # Optional display
     description = optional(string)  # Human-readable metric name (auto-generated if not provided)
@@ -280,6 +282,26 @@ variable "custom_alarms" {
       )
     ])
     error_message = "Each custom alarm must have at least one threshold set (high_threshold, vhigh_threshold, low_threshold, or vlow_threshold)."
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.custom_alarms : (
+        # Cannot set both statistic and extended_statistic
+        # If extended_statistic is set, statistic must be null or "Average" (the default)
+        v.extended_statistic == null || v.statistic == null || v.statistic == "Average"
+      )
+    ])
+    error_message = "Each custom alarm can use either 'statistic' or 'extended_statistic', not both. When using extended_statistic, omit the statistic field or leave it as default."
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.custom_alarms : (
+        v.treat_missing_data == null || contains(["missing", "ignore", "breaching", "notBreaching"], v.treat_missing_data)
+      )
+    ])
+    error_message = "treat_missing_data must be one of: 'missing', 'ignore', 'breaching', or 'notBreaching'."
   }
 }
 

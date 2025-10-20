@@ -40,11 +40,13 @@ locals {
           config.description,
           config.metric_name
         )
-        metric_postfix     = config.unit
-        statistic          = config.statistic
-        period             = config.period
-        evaluation_periods = config.evaluation_periods
-        directionality     = "high"
+        metric_postfix      = config.unit
+        statistic           = config.statistic
+        extended_statistic  = config.extended_statistic
+        period              = config.period
+        evaluation_periods  = config.evaluation_periods
+        treat_missing_data  = config.treat_missing_data
+        directionality      = "high"
 
         low_value          = config.high_threshold
         high_value         = config.vhigh_threshold
@@ -61,11 +63,13 @@ locals {
           config.description,
           config.metric_name
         )
-        metric_postfix     = config.unit
-        statistic          = config.statistic
-        period             = config.period
-        evaluation_periods = config.evaluation_periods
-        directionality     = "low"
+        metric_postfix      = config.unit
+        statistic           = config.statistic
+        extended_statistic  = config.extended_statistic
+        period              = config.period
+        evaluation_periods  = config.evaluation_periods
+        treat_missing_data  = config.treat_missing_data
+        directionality      = "low"
 
         low_value          = config.low_threshold
         high_value         = config.vlow_threshold
@@ -236,9 +240,14 @@ resource "aws_cloudwatch_metric_alarm" "alarms" {
 
   comparison_operator = each.value["directionality"] == "high" ? "GreaterThanOrEqualToThreshold" : "LessThanOrEqualToThreshold"
   evaluation_periods  = lookup(each.value, "evaluation_periods", 1)
-  statistic           = lookup(each.value, "statistic", "Average")
   period              = lookup(each.value, "period", 300)
   threshold           = each.value["value"]
+
+  # CloudWatch supports either statistic OR extended_statistic, not both
+  statistic          = lookup(each.value, "extended_statistic", null) == null ? lookup(each.value, "statistic", "Average") : null
+  extended_statistic = lookup(each.value, "extended_statistic", null)
+
+  treat_missing_data = lookup(each.value, "treat_missing_data", "missing")
 
   alarm_actions = each.value["level"] == "high" ? var.high_priority_alarm : var.low_priority_alarm
   ok_actions    = each.value["level"] == "high" ? var.high_priority_alarm : var.low_priority_alarm
