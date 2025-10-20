@@ -138,6 +138,69 @@ module "alarms" {
 }
 ```
 
+### Alarm Selection Flowchart
+
+The module intelligently selects which alarms to create based on your RDS instance characteristics:
+
+```mermaid
+flowchart TD
+    Start([RDS Instance]) --> Always[Always Monitored<br/>6 Metrics]
+
+    Always --> CPU[CPU Utilization]
+    Always --> ReadLat[Read Latency]
+    Always --> WriteLat[Write Latency]
+    Always --> DiskQueue[DiskQueueDepth]
+    Always --> Memory[FreeableMemory]
+    Always --> Swap[SwapUsage]
+
+    Always --> CheckReplica{Is Read<br/>Replica?}
+    CheckReplica -->|Yes| ReplicaLag[Replica Lag]
+    CheckReplica -->|Yes| ReplicaFault[Replication Fault<br/>Detection]
+
+    ReplicaLag --> CheckBurstable{Is Burstable<br/>Instance?}
+    ReplicaFault --> CheckBurstable
+    CheckReplica -->|No| CheckBurstable
+
+    CheckBurstable -->|Yes| CPUCredit[CPU Credit Balance]
+    CheckBurstable -->|No| CheckStorage{Is gp2<br/>< 1TB?}
+
+    CPUCredit --> CheckStorage
+    CheckStorage -->|Yes| BurstBal[Burst Balance]
+    CheckStorage -->|No| CheckStorageSize{Storage Size<br/>Known?}
+
+    BurstBal --> CheckStorageSize
+    CheckStorageSize -->|Yes| FreeStorage[Free Storage Space]
+    CheckStorageSize -->|No| Result([6-11 Alarms Created<br/>Based on Instance Type])
+
+    FreeStorage --> Result
+
+    style Always fill:#e1f5ff
+    style CPU fill:#fff4e1
+    style ReadLat fill:#fff4e1
+    style WriteLat fill:#fff4e1
+    style DiskQueue fill:#fff4e1
+    style Memory fill:#fff4e1
+    style Swap fill:#fff4e1
+    style ReplicaLag fill:#ffe1f5
+    style ReplicaFault fill:#ffe1f5
+    style CPUCredit fill:#ffe1f5
+    style BurstBal fill:#ffe1f5
+    style FreeStorage fill:#ffe1f5
+    style Result fill:#e1ffe1
+```
+
+**How many alarms will be created for my instance?**
+
+- **Standard instance (e.g., db.m6i.large, gp3)**: 6 alarms (always-monitored metrics only)
+- **Read replica (e.g., db.m6i.large replica)**: 8 alarms (+replica lag, +replication fault detection)
+- **Burstable instance (e.g., db.t3.medium, db.t4g.large)**: 7 alarms (+CPU credit balance)
+- **Small gp2 instance (e.g., db.m5.large with 500GB gp2)**: 7 alarms (+burst balance)
+- **Burstable replica with gp2 (e.g., db.t3.small replica, 800GB gp2)**: 10 alarms (all conditionals apply)
+
+**Note**: Burstable instances include all T-series instance classes: db.t2.*, db.t3.*, and db.t4g.*
+
+All instances also get **Free Storage Space** monitoring when the module can determine the allocated storage size.
+
 ## Custom Alarms
 
 In addition to the built-in alarms for common RDS metrics, you can define custom alarms for any CloudWatch metric using the `custom_alarms` variable.
