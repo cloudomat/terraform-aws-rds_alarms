@@ -156,24 +156,23 @@ flowchart TD
     Always --> CheckReplica{Is Read<br/>Replica?}
     CheckReplica -->|Yes| ReplicaLag[Replica Lag]
     CheckReplica -->|Yes| ReplicaFault[Replication Fault<br/>Detection]
-    CheckReplica -->|No| CheckBurstable
 
-    ReplicaLag --> CheckBurstable{Is T3/T4g<br/>Instance?}
+    ReplicaLag --> CheckBurstable{Is Burstable<br/>Instance?}
     ReplicaFault --> CheckBurstable
-
     CheckReplica -->|No| CheckBurstable
+
     CheckBurstable -->|Yes| CPUCredit[CPU Credit Balance]
-    CheckBurstable -->|No| CheckStorage
+    CheckBurstable -->|No| CheckStorage{Is gp2<br/>< 1TB?}
 
-    CPUCredit --> CheckStorage{Is gp2<br/>< 1TB?}
+    CPUCredit --> CheckStorage
     CheckStorage -->|Yes| BurstBal[Burst Balance]
-    CheckStorage -->|No| CheckStorageSize
+    CheckStorage -->|No| CheckStorageSize{Storage Size<br/>Known?}
 
-    BurstBal --> CheckStorageSize{Storage Size<br/>Known?}
+    BurstBal --> CheckStorageSize
     CheckStorageSize -->|Yes| FreeStorage[Free Storage Space]
-    CheckStorageSize -->|No| Result
+    CheckStorageSize -->|No| Result([6-11 Alarms Created<br/>Based on Instance Type])
 
-    FreeStorage --> Result([6-11 Alarms Created<br/>Based on Instance Type])
+    FreeStorage --> Result
 
     style Always fill:#e1f5ff
     style CPU fill:#fff4e1
@@ -194,9 +193,11 @@ flowchart TD
 
 - **Standard instance (e.g., db.m6i.large, gp3)**: 6 alarms (always-monitored metrics only)
 - **Read replica (e.g., db.m6i.large replica)**: 8 alarms (+replica lag, +replication fault detection)
-- **Burstable instance (e.g., db.t3.medium)**: 7 alarms (+CPU credit balance)
+- **Burstable instance (e.g., db.t3.medium, db.t4g.large)**: 7 alarms (+CPU credit balance)
 - **Small gp2 instance (e.g., db.m5.large with 500GB gp2)**: 7 alarms (+burst balance)
-- **Burstable replica with gp2 (e.g., db.t4g.small replica, 800GB gp2)**: 10 alarms (all conditionals apply)
+- **Burstable replica with gp2 (e.g., db.t3.small replica, 800GB gp2)**: 10 alarms (all conditionals apply)
+
+**Note**: Burstable instances include all T-series instance classes: db.t2.*, db.t3.*, and db.t4g.*
 
 All instances also get **Free Storage Space** monitoring when the module can determine the allocated storage size.
 
