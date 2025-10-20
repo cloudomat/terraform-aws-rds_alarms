@@ -1,0 +1,8 @@
+aws_region = "us-east-1"
+
+# Your burstable RDS instance identifier (db.t3.* or db.t4g.* instance class)
+db_instance_identifier = "my-dev-database"
+
+# SNS topic ARNs for alarm notifications
+low_priority_sns_topic  = "arn:aws:sns:us-east-1:123456789012:rds-alerts-warning"
+high_priority_sns_topic = "arn:aws:sns:us-east-1:123456789012:rds-alerts-critical"

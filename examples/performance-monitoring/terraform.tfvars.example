@@ -1,0 +1,8 @@
+aws_region = "us-east-1"
+
+# Your RDS instance identifier
+db_instance_identifier = "my-production-database"
+
+# SNS topic ARNs for alarm notifications
+low_priority_sns_topic  = "arn:aws:sns:us-east-1:123456789012:rds-alerts-warning"
+high_priority_sns_topic = "arn:aws:sns:us-east-1:123456789012:rds-alerts-critical"
