@@ -10,8 +10,12 @@ This is a Terraform module for creating CloudWatch alarms for AWS RDS instances.
 
 ## Requirements
 
-- Terraform >= 1.5.0
-- AWS Provider >= 4, < 6
+- Terraform >= 1.5.0 (tested with 1.5.7, 1.7.5, 1.9.8, 1.11.4, 1.13.4, latest)
+- AWS Provider >= 4, < 7 (tested with 4.x, 5.x, 6.x)
+
+### Support Policy
+
+We support Terraform and AWS Provider versions from the previous 2 years of releases, aligning with HashiCorp's 2-year GA support window.
 
 ## Testing
 
@@ -88,3 +92,4 @@ These are merged into `relevant_alarms` (main.tf:172) before being split into `l
 ## Moved Blocks
 
 Lines 174-247 contain `moved` blocks for backward compatibility from v0.1.0 to v0.2.0, mapping old individual alarm resources to the new dynamic alarm map.
+- Keep your commit messages short and succint. Do not restate things that can easily be inferred from the diff.

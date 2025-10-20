@@ -4,6 +4,31 @@ This module creates CloudWatch alarms for RDS instances.
 
 Each supported metric can be given two thresholds. The first threshold will trigger a "low priority" alarm. This is intended for early notification of unusual system behavior or known potential issues, such as running out of database capacity. The second threshold will trigger a "high priority" alarm. This is intended for situations which require immediate attention and may indicate that downtime of the ElastiCache cluster or services using the cluster is imminent.
 
+## Requirements
+
+| Name | Version |
+|------|---------|
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4, < 7 |
+
+### Tested Versions
+
+This module is actively tested against the following versions in CI:
+
+- **Terraform:** 1.5.7, 1.7.5, 1.9.8, 1.11.4, 1.13.4, and latest (currently 1.14.x)
+- **AWS Provider:** 4.x, 5.x, and 6.x (tested via `test-all-versions.sh`)
+
+### Support Policy
+
+We support Terraform and AWS Provider versions from the **previous 2 years** of releases:
+
+- **Terraform:** Currently supports 1.5.0+ (June 2023) through latest
+- **AWS Provider:** Currently supports 4.x (April 2023) through 6.x
+
+While we specify minimum versions, we actively test and validate compatibility with the versions listed above. Older versions may work but are not officially validated. Newer versions should work due to our use of stable Terraform/AWS features, but are validated as they release.
+
+This policy aligns with HashiCorp's 2-year general availability support window and ensures compatibility with modern Terraform workflows while maintaining stability.
+
 ## Examples
 
 See the [examples/](examples/) directory for complete, working configurations:
