@@ -1,3 +1,23 @@
+## 0.4.0
+
+FEATURES:
+
+* **Extended Statistics Support**: Custom alarms now support percentile-based metrics
+  * New `extended_statistic` field enables p50, p95, p99, p100, and other percentiles
+  * Ideal for performance monitoring use cases (e.g., p99 latency tracking)
+  * CloudWatch enforces exclusive use of either `statistic` or `extended_statistic`
+  * Validation prevents conflicting configuration
+* **treat_missing_data Configuration**: Custom alarms can now control behavior during missing data
+  * New `treat_missing_data` field supports: "missing", "ignore", "breaching", "notBreaching"
+  * Defaults to "missing" for backward compatibility
+  * Useful during maintenance windows or intermittent metric reporting
+  * Validation ensures only valid CloudWatch values are accepted
+
+NOTES:
+
+* All new fields are optional with backward-compatible defaults
+* No breaking changes from v0.3.0
+
 ## 0.3.0
 
 FEATURES:
