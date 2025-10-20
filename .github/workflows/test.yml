@@ -11,8 +11,13 @@ on:
 
 jobs:
   test:
-    name: Terraform Tests
+    name: Terraform ${{ matrix.terraform_version }}
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        terraform_version: ['1.5.7', '1.7.5', '1.9.8', '1.11.4', '1.13.4', 'latest']
+      fail-fast: false
 
     steps:
       - name: Checkout code
@@ -21,7 +26,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: latest
+          terraform_version: ${{ matrix.terraform_version }}
           terraform_wrapper: false
 
       - name: Initialize Terraform
