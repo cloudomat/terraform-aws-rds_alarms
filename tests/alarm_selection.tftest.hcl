@@ -465,3 +465,117 @@ run "burstable_instance_alarms" {
     EOM
   }
 }
+
+run "new_metrics_alarms" {
+  variables {
+    disk_queue_depth_high_threshold  = 10
+    disk_queue_depth_vhigh_threshold = 20
+    freeable_memory_low_threshold    = 512
+    freeable_memory_vlow_threshold   = 256
+    swap_usage_high_threshold        = 100
+    swap_usage_vhigh_threshold       = 200
+  }
+
+  command = plan
+
+  assert {
+    condition     = length(keys(aws_cloudwatch_metric_alarm.alarms)) == 6
+    error_message = <<-EOM
+    Did not create all expected alarms.
+    Got ${join(", ", keys(aws_cloudwatch_metric_alarm.alarms))}
+    EOM
+  }
+
+  # DiskQueueDepth tests
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_disk_queue_depth"].alarm_name == "RDS ${var.db_instance.identifier} Disk Queue Depth High"
+    error_message = "Incorrect low priority alarm name for DiskQueueDepth"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_disk_queue_depth"].alarm_name == "RDS ${var.db_instance.identifier} Disk Queue Depth Very High"
+    error_message = "Incorrect high priority alarm name for DiskQueueDepth"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_disk_queue_depth"].threshold == var.disk_queue_depth_high_threshold
+    error_message = "Incorrect low priority threshold for DiskQueueDepth"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_disk_queue_depth"].threshold == var.disk_queue_depth_vhigh_threshold
+    error_message = "Incorrect high priority threshold for DiskQueueDepth"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_disk_queue_depth"].alarm_description == "${var.db_instance.identifier} Disk Queue Depth is above ${var.disk_queue_depth_high_threshold}"
+    error_message = "Incorrect alarm description for DiskQueueDepth low priority"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_disk_queue_depth"].alarm_description == "${var.db_instance.identifier} Disk Queue Depth is above ${var.disk_queue_depth_vhigh_threshold}"
+    error_message = "Incorrect alarm description for DiskQueueDepth high priority"
+  }
+
+  # FreeableMemory tests
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_freeable_memory"].alarm_name == "RDS ${var.db_instance.identifier} Freeable Memory Low"
+    error_message = "Incorrect low priority alarm name for FreeableMemory"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_freeable_memory"].alarm_name == "RDS ${var.db_instance.identifier} Freeable Memory Very Low"
+    error_message = "Incorrect high priority alarm name for FreeableMemory"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_freeable_memory"].threshold == (512 * 1024 * 1024)
+    error_message = "Incorrect low priority threshold for FreeableMemory (should be in bytes)"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_freeable_memory"].threshold == (256 * 1024 * 1024)
+    error_message = "Incorrect high priority threshold for FreeableMemory (should be in bytes)"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_freeable_memory"].alarm_description == "${var.db_instance.identifier} Freeable Memory is below ${var.freeable_memory_low_threshold}MB"
+    error_message = "Incorrect alarm description for FreeableMemory low priority"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_freeable_memory"].alarm_description == "${var.db_instance.identifier} Freeable Memory is below ${var.freeable_memory_vlow_threshold}MB"
+    error_message = "Incorrect alarm description for FreeableMemory high priority"
+  }
+
+  # SwapUsage tests
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_swap_usage"].alarm_name == "RDS ${var.db_instance.identifier} Swap Usage High"
+    error_message = "Incorrect low priority alarm name for SwapUsage"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_swap_usage"].alarm_name == "RDS ${var.db_instance.identifier} Swap Usage Very High"
+    error_message = "Incorrect high priority alarm name for SwapUsage"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_swap_usage"].threshold == (100 * 1024 * 1024)
+    error_message = "Incorrect low priority threshold for SwapUsage (should be in bytes)"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_swap_usage"].threshold == (200 * 1024 * 1024)
+    error_message = "Incorrect high priority threshold for SwapUsage (should be in bytes)"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["low_swap_usage"].alarm_description == "${var.db_instance.identifier} Swap Usage is above ${var.swap_usage_high_threshold}MB"
+    error_message = "Incorrect alarm description for SwapUsage low priority"
+  }
+
+  assert {
+    condition     = aws_cloudwatch_metric_alarm.alarms["high_swap_usage"].alarm_description == "${var.db_instance.identifier} Swap Usage is above ${var.swap_usage_vhigh_threshold}MB"
+    error_message = "Incorrect alarm description for SwapUsage high priority"
+  }
+}

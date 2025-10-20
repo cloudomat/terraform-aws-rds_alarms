@@ -167,6 +167,54 @@ variable "cpu_credit_balance_vlow_threshold" {
   EOM
 }
 
+variable "disk_queue_depth_high_threshold" {
+  type        = number
+  default     = null
+  description = <<-EOM
+  How high can the average disk queue depth be before a low priority alert is triggered? Set to null to disable.
+  EOM
+}
+
+variable "disk_queue_depth_vhigh_threshold" {
+  type        = number
+  default     = null
+  description = <<-EOM
+  How high can the average disk queue depth be before a high priority alert is triggered? Set to null to disable.
+  EOM
+}
+
+variable "freeable_memory_low_threshold" {
+  type        = number
+  default     = null
+  description = <<-EOM
+  How low can freeable memory (in MB) be before a low priority alert is triggered? Set to null to disable.
+  EOM
+}
+
+variable "freeable_memory_vlow_threshold" {
+  type        = number
+  default     = null
+  description = <<-EOM
+  How low can freeable memory (in MB) be before a high priority alert is triggered? Set to null to disable.
+  EOM
+}
+
+variable "swap_usage_high_threshold" {
+  type        = number
+  default     = null
+  description = <<-EOM
+  How high can swap usage (in MB) be before a low priority alert is triggered? Set to null to disable.
+  EOM
+}
+
+variable "swap_usage_vhigh_threshold" {
+  type        = number
+  default     = null
+  description = <<-EOM
+  How high can swap usage (in MB) be before a high priority alert is triggered? Set to null to disable.
+  EOM
+}
+
 variable "custom_alarms" {
   description = <<-EOT
     Custom CloudWatch alarms for additional RDS metrics.
