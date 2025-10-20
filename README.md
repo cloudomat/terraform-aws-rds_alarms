@@ -291,3 +291,118 @@ custom_alarms = {
 ```
 
 See [examples/performance-monitoring](examples/performance-monitoring/) for a complete example.
+
+## Upgrading from 0.x to 1.0
+
+### Summary
+
+Version 1.0 is **fully backward compatible** with v0.2.1. You can upgrade without making any changes to your existing configuration.
+
+### What's New
+
+**v0.3.0 Features:**
+- **3 New Built-in Metrics**: DiskQueueDepth, FreeableMemory, SwapUsage
+- **Custom Alarms Support**: Define alarms for any RDS CloudWatch metric
+- **AWS Provider v6 Support**: Now supports AWS Provider 4.x, 5.x, and 6.x
+
+**v0.4.0 Features:**
+- **Extended Statistics**: Use percentiles (p50, p95, p99) for custom alarms
+- **treat_missing_data**: Control alarm behavior during maintenance windows
+
+### Migration Steps
+
+1. **Update module version** in your Terraform configuration:
+
+```hcl
+module "rds_alarms" {
+  source  = "cloudomat/rds_alarms/aws"
+  version = "~> 1.0"  # Update from "~> 0.2"
+
+  # Your existing configuration works as-is
+  db_instance = data.aws_db_instance.instance
+  # ... rest of your config
+}
+```
+
+2. **Run Terraform plan** to see what will change:
+
+```bash
+terraform plan
+```
+
+You should see **no changes** to your existing alarms if you haven't added any new threshold variables.
+
+3. **Apply the upgrade**:
+
+```bash
+terraform apply
+```
+
+### Optional: Enable New Features
+
+After upgrading, you can optionally enable the new metrics:
+
+```hcl
+module "rds_alarms" {
+  source  = "cloudomat/rds_alarms/aws"
+  version = "~> 1.0"
+
+  db_instance = data.aws_db_instance.instance
+
+  # Your existing thresholds continue to work
+  cpu_utilization_high_threshold = 80
+
+  # NEW in v0.3.0: Enable memory monitoring
+  freeable_memory_low_threshold  = 1024  # 1GB warning
+  freeable_memory_vlow_threshold = 512   # 512MB critical
+
+  # NEW in v0.3.0: Enable I/O monitoring
+  disk_queue_depth_high_threshold  = 64
+  disk_queue_depth_vhigh_threshold = 128
+
+  # NEW in v0.3.0: Enable swap monitoring
+  swap_usage_high_threshold  = 512   # 512MB warning
+  swap_usage_vhigh_threshold = 1024  # 1GB critical
+}
+```
+
+Or use custom alarms for advanced monitoring:
+
+```hcl
+module "rds_alarms" {
+  source  = "cloudomat/rds_alarms/aws"
+  version = "~> 1.0"
+
+  db_instance = data.aws_db_instance.instance
+
+  # NEW in v0.3.0: Custom alarms for any metric
+  custom_alarms = {
+    "p99_latency" = {
+      metric_name        = "ReadLatency"
+      extended_statistic = "p99"  # NEW in v0.4.0
+      vhigh_threshold    = 0.100  # 100ms
+      treat_missing_data = "notBreaching"  # NEW in v0.4.0
+    }
+  }
+}
+```
+
+### Validation
+
+After upgrading, verify your alarms are working:
+
+1. **Check CloudWatch console**: Ensure all expected alarms are present
+2. **Review alarm history**: Verify no unexpected state changes occurred
+3. **Test notifications**: Confirm SNS topics are receiving alarm notifications
+
+### Breaking Changes
+
+**None!** Version 1.0 maintains full backward compatibility with v0.2.1.
+
+All new variables default to `null` (disabled), so existing configurations continue to work unchanged.
+
+### Need Help?
+
+- See [examples/](examples/) for working configurations
+- Check [CHANGELOG.md](CHANGELOG.md) for detailed release notes
+- Review the [Built-in Metrics](#built-in-metrics) section for new monitoring options
