@@ -4,6 +4,18 @@ This module creates CloudWatch alarms for RDS instances.
 
 Each supported metric can be given two thresholds. The first threshold will trigger a "low priority" alarm. This is intended for early notification of unusual system behavior or known potential issues, such as running out of database capacity. The second threshold will trigger a "high priority" alarm. This is intended for situations which require immediate attention and may indicate that downtime of the ElastiCache cluster or services using the cluster is imminent.
 
+## Examples
+
+See the [examples/](examples/) directory for complete, working configurations:
+
+- **[minimal/](examples/minimal/)** - Production-ready starter with essential alarms (CPU, latency, storage)
+- **[replica-monitoring/](examples/replica-monitoring/)** - Read replica with lag and fault detection
+- **[performance-monitoring/](examples/performance-monitoring/)** - Advanced monitoring with p99 latency tracking
+- **[burstable-instance/](examples/burstable-instance/)** - T3/T4g instances with CPU credit balance monitoring
+- **[complete/](examples/complete/)** - All features enabled (reference configuration)
+
+Each example includes `README.md`, `main.tf`, `variables.tf`, and `terraform.tfvars.example` for quick deployment.
+
 ## Installation
 
 This is a complete example of a minimal set of alarms.
