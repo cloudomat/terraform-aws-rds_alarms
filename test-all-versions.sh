@@ -77,8 +77,7 @@ echo -e "${BLUE}Step 1: Running standard Terraform tests${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-run_test "Terraform test (alarm_selection)" terraform test -filter=tests/alarm_selection.tftest.hcl
-run_test "Terraform test (custom_alarms)" terraform test -filter=tests/custom_alarms.tftest.hcl
+run_test "Terraform test" terraform test
 
 echo ""
 
